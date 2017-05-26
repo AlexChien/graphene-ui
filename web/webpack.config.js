@@ -131,7 +131,7 @@ module.exports = function(env) {
             ]
         },
         output: {
-            publicPath: env.prod ? env.cdn : "/",
+            publicPath: "/", //env.prod ? env.cdn : "/",
             path: outputPath,
             filename: "[name].js",
             chunkFilename: "[chunkhash].js",
