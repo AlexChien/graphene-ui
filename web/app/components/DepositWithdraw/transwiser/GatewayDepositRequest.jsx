@@ -1,7 +1,7 @@
 import React from "react";
 import Translate from "react-translate-component";
 import counterpart from "counterpart";
-import {ChainStore} from "graphenejs-lib";
+import {ChainStore} from "bitsharesjs/es";
 import ChainTypes from "components/Utility/ChainTypes";
 import BindToChainState from "components/Utility/BindToChainState";
 import WithdrawModal from "./WithdrawModal";
@@ -10,7 +10,7 @@ import Trigger from "react-foundation-apps/src/trigger";
 import ZfApi from "react-foundation-apps/src/utils/foundation-api";
 import AccountBalance from "../../Account/AccountBalance";
 import DepositAddressCache from "./DepositAddressCache";
-import TransConf from "./MingEXConfig";
+import TransConf from "./TransConfig";
 import Post from "common/formPost";
 import AssetName from "components/Utility/AssetName";
 import LinkToAccountById from "components/Blockchain/LinkToAccountById";

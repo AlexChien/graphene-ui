@@ -6,12 +6,14 @@ import Translate from "react-translate-component";
 import ChainTypes from "../Utility/ChainTypes";
 import BindToChainState from "../Utility/BindToChainState";
 
-import TranswiserDepositWithdraw from "../DepositWithdraw/transwiser.v1/TranswiserDepositWithdraw";
+// import TranswiserDepositWithdraw from "../DepositWithdraw/transwiser.v1/TranswiserDepositWithdraw";
 
+import TransGatewayStore from "stores/TransGatewayStore";
+import TransGatewayActions from "actions/TransGatewayActions";
 import TranswiserFiatDepositWithdrawal from "../DepositWithdraw/transwiser/FiatDepositWithdrawal";
 import TranswiserFiatTransactionHistory from "../DepositWithdraw/transwiser/FiatTransactionHistory";
 import TranswiserGateway from "../DepositWithdraw/transwiser/Gateway";
-import TransConf from "../DepositWithdraw/transwiser3/TransConfig";
+import TransConf from "../DepositWithdraw/transwiser/TransConfig";
 
 import BlockTradesGateway from "../DepositWithdraw/BlockTradesGateway";
 import OpenLedgerFiatDepositWithdrawal from "../DepositWithdraw/openledger/OpenLedgerFiatDepositWithdrawal";
@@ -119,11 +121,11 @@ class AccountDepositWithdraw extends React.Component {
         });
     }
 
-    renderServices(blockTradesGatewayCoins, openLedgerGatewayCoins) {
+    renderServices(blockTradesGatewayCoins, openLedgerGatewayCoins, transGatewayCoins) {
         //let services = ["Openledger (OPEN.X)", "BlockTrades (TRADE.X)", "Transwiser", "BitKapital"];
         let serList = [];
         let { account } = this.props;
-        let { olService, btService } = this.state;
+        let { olService, btService, transService } = this.state;
 
         serList.push({
             name: "Openledger (OPEN.X)",
@@ -207,6 +209,44 @@ class AccountDepositWithdraw extends React.Component {
         });
 
         serList.push({
+            name: "Transwiser (TRANS.X)",
+            template: (
+                <div className="content-block">
+                        {/* <div className="float-right">
+                            <a href="https://www.transwiser.com/" target="__blank" rel="noopener noreferrer"><Translate content="gateway.website" /></a>
+                        </div> */}
+                        <div className="service-selector">
+                            <ul className="button-group segmented no-margin">
+                                <li onClick={this.toggleTransService.bind(this, "gateway")} className={transService === "gateway" ? "is-active" : ""}><a><Translate content="gateway.gateway" /></a></li>
+                                <li onClick={this.toggleTransService.bind(this, "fiat")} className={transService === "fiat" ? "is-active" : ""}><a>Fiat</a></li>
+                            </ul>
+                        </div>
+
+                        {transService === "gateway" && transGatewayCoins.length ?
+                        <TranswiserGateway
+                            account={account}
+                            coins={transGatewayCoins}
+                            provider="transwiser"
+                        /> : null}
+
+                        {transService === "fiat" ?
+                        <div>
+                            <div style={{paddingBottom: 15}}><Translate component="h5" content="gateway.fiat_text" /></div>
+
+                            <TranswiserFiatDepositWithdrawal
+                                        rpc_url={TransConf.fiat_transaction_history_url}
+                                        account={account}
+                                        issuer_account="transwiser-wallet" />
+                            <TranswiserFiatTransactionHistory
+                                        rpc_url={TransConf.fiat_transaction_history_url}
+                                        account={account} />
+                        </div> : null}
+                    </div>
+            )
+        });
+
+        /*
+        serList.push({
             name: "Transwiser",
             template: (
                 <div>
@@ -225,17 +265,13 @@ class AccountDepositWithdraw extends React.Component {
                             issuerAccount="transwiser-wallet"
                             account={account.get("name")}
                             receiveAsset="CNY" />
-                        {/*
-                        <TranswiserDepositWithdraw
-                            issuerAccount="transwiser-wallet"
-                            account={this.props.account.get("name")}
-                            receiveAsset="BOTSCNY" />
-                        */}
+                        {
                         </tbody>
                     </table>
                 </div>
             )
         });
+        */
 
         serList.push({
             name: "BitKapital",
@@ -277,7 +313,7 @@ class AccountDepositWithdraw extends React.Component {
             return 0;
         });
 
-        let transwiser3GatewayCoins = this.state.transwiser3BackedCoins.map(coin => {
+        let transGatewayCoins = this.props.transBackedCoins.map(coin => {
             return coin;
         })
         .sort((a, b) => {
@@ -288,7 +324,7 @@ class AccountDepositWithdraw extends React.Component {
     			return 0
     		});
 
-        let services = this.renderServices(blockTradesGatewayCoins, openLedgerGatewayCoins);
+        let services = this.renderServices(blockTradesGatewayCoins, openLedgerGatewayCoins, transGatewayCoins);
 
         let options = services.map((services_obj, index) => {
             return <option key={index} value={index}>{services_obj.name}</option>;
@@ -349,8 +385,8 @@ class DepositStoreWrapper extends React.Component {
     componentWillMount() {
         if (Apis.instance().chain_id.substr(0, 8) === "4018d784") { // Only fetch this when on BTS main net
             GatewayActions.fetchCoins.defer(); // Openledger
-            GatewayActions.fetchCoins.defer({backer: "TRADE"}); // Blocktrades
-            // GatewayActions.fetchCoins.defer({backer: "TRANS"}); // Transwiser
+            // GatewayActions.fetchCoins.defer({backer: "TRADE"}); // Blocktrades
+            TransGatewayActions.fetchCoins.defer({backer: "TRANS"}); // Transwiser
         }
     }
 
@@ -368,8 +404,8 @@ export default connect(DepositStoreWrapper, {
             account: AccountStore.getState().currentAccount,
             viewSettings: SettingsStore.getState().viewSettings,
             openLedgerBackedCoins: GatewayStore.getState().backedCoins.get("OPEN", []),
-            blockTradesBackedCoins: GatewayStore.getState().backedCoins.get("TRADE", []),
-            transBackedCoins: GatewayStore.getState().backedCoins.get("TRANS", [])
+            // blockTradesBackedCoins: GatewayStore.getState().backedCoins.get("TRADE", []),
+            transBackedCoins: TransGatewayStore.getState().backedCoins.get("TRANS", [])
         };
     }
 });

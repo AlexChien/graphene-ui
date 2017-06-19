@@ -34,11 +34,11 @@ class FiatDepositWithdrawCurrency extends React.Component {
     }
 
     getWithdrawModalId() {
-        return "withdraw_fiat_transwiser3_"+this.props.receive_asset.get('symbol');
+        return "withdraw_fiat_trans_"+this.props.receive_asset.get('symbol');
     }
 
     getDepositModalId() {
-        return "deposit_fiat_transwiser3_"+this.props.receive_asset.get('symbol');
+        return "deposit_fiat_trans_"+this.props.receive_asset.get('symbol');
     }
 
     onWithdraw() {

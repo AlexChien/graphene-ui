@@ -1,18 +1,18 @@
 import alt from "alt-instance";
-import { fetchCoins, fetchBridgeCoins, getBackedCoins, getActiveWallets } from "DepositWithdraw/transwiser/methods";
-import {blockTradesAPIs} from "api/apiConfig";
+import { fetchCoins, fetchBridgeCoins, getBackedCoins, getActiveWallets } from "common/transwiserMethods";
+import TransConf from "components/DepositWithdraw/transwiser/TransConfig";
 
 let inProgress = {};
 
 class GatewayActions {
 
-    fetchCoins({backer = "OPEN", url = undefined} = {}) {
+    fetchCoins({backer = "TRANS", url = undefined} = {}) {
         if (!inProgress["fetchCoins_" + backer]) {
             inProgress["fetchCoins_" + backer] = true;
             return (dispatch) => {
                 Promise.all([
                     fetchCoins(url),
-                    fetchBridgeCoins(blockTradesAPIs.BASE_OL),
+                    // fetchBridgeCoins(TransConf.api_endpoint),
                     getActiveWallets(url)
                 ]).then(result => {
                     delete inProgress["fetchCoins_" + backer];
@@ -37,7 +37,7 @@ class GatewayActions {
             return (dispatch) => {
                 Promise.all([
                     fetchCoins(url),
-                    fetchBridgeCoins(blockTradesAPIs.BASE),
+                    fetchBridgeCoins(TransConf.BASE),
                     getActiveWallets(url)
                 ]).then(result => {
                     delete inProgress["fetchBridgeCoins"];

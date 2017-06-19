@@ -1,25 +1,25 @@
 import ls from "./localStorage";
-import {blockTradesAPIs} from "api/apiConfig";
-const blockTradesStorage = new ls("");
+import {transwiserAPIs} from "components/DepositWithdraw/transwiser/TransConfig";
+const transwiserStorage = new ls("");
 
-export function fetchCoins(url = (blockTradesAPIs.BASE_OL + blockTradesAPIs.COINS_LIST)) {
+export function fetchCoins(url = (transwiserAPIs.BASE_OL + transwiserAPIs.COINS_LIST)) {
     return fetch(url).then(reply => reply.json().then(result => {
         return result;
     })).catch(err => {
-        console.log("error fetching blocktrades list of coins", err, url);
+        console.log("error fetching transwiser list of coins", err, url);
     });
 }
 
-export function fetchBridgeCoins(baseurl = (blockTradesAPIs.BASE)) {
-    let url = baseurl + blockTradesAPIs.TRADING_PAIRS;
+export function fetchBridgeCoins(baseurl = (transwiserAPIs.BASE)) {
+    let url = baseurl + transwiserAPIs.TRADING_PAIRS;
     return fetch(url, {method: "get", headers: new Headers({"Accept": "application/json"})}).then(reply => reply.json().then(result => {
         return result;
     })).catch(err => {
-        console.log("error fetching blocktrades list of coins", err, url);
+        console.log("error fetching transwiser list of coins", err, url);
     });
 }
 
-export function getDepositLimit(inputCoin, outputCoin, url = (blockTradesAPIs.BASE + blockTradesAPIs.DEPOSIT_LIMIT)) {
+export function getDepositLimit(inputCoin, outputCoin, url = (transwiserAPIs.BASE + transwiserAPIs.DEPOSIT_LIMIT)) {
     return fetch(url + "?inputCoinType=" + encodeURIComponent(inputCoin) + "&outputCoinType=" + encodeURIComponent(outputCoin),
          {method: "get", headers: new Headers({"Accept": "application/json"})}).then(reply => reply.json().then(result => {
         return result;
@@ -28,7 +28,7 @@ export function getDepositLimit(inputCoin, outputCoin, url = (blockTradesAPIs.BA
     });
 }
 
-export function estimateOutput(inputAmount, inputCoin, outputCoin, url = (blockTradesAPIs.BASE + blockTradesAPIs.ESTIMATE_OUTPUT)) {
+export function estimateOutput(inputAmount, inputCoin, outputCoin, url = (transwiserAPIs.BASE + transwiserAPIs.ESTIMATE_OUTPUT)) {
     return fetch(url + "?inputAmount=" + encodeURIComponent(inputAmount) +"&inputCoinType=" + encodeURIComponent(inputCoin) + "&outputCoinType=" + encodeURIComponent(outputCoin),
          {method: "get", headers: new Headers({"Accept": "application/json"})}).then(reply => reply.json().then(result => {
         return result;
@@ -37,15 +37,15 @@ export function estimateOutput(inputAmount, inputCoin, outputCoin, url = (blockT
     });
 }
 
-export function getActiveWallets(url = (blockTradesAPIs.BASE_OL + blockTradesAPIs.ACTIVE_WALLETS)) {
+export function getActiveWallets(url = (transwiserAPIs.BASE_OL + transwiserAPIs.ACTIVE_WALLETS)) {
     return fetch(url).then(reply => reply.json().then(result => {
         return result;
     })).catch(err => {
-        console.log("error fetching blocktrades active wallets", err, url);
+        console.log("error fetching transwiser active wallets", err, url);
     });
 }
 
-export function requestDepositAddress({inputCoinType, outputCoinType, outputAddress, url = blockTradesAPIs.BASE_OL, stateCallback}) {
+export function requestDepositAddress({inputCoinType, outputCoinType, outputAddress, url = transwiserAPIs.BASE_OL, stateCallback}) {
     let body = {
         inputCoinType,
         outputCoinType,
@@ -86,13 +86,13 @@ export function getBackedCoins({allCoins, tradingPairs, backer}) {
         allowed_outputs_by_input[pair.inputCoinType][pair.outputCoinType] = true;
     });
 
-    let blocktradesBackedCoins = [];
+    let transwiserBackedCoins = [];
     allCoins.forEach(coin_type => {
         if (coin_type.walletSymbol.startsWith(backer + ".") && coin_type.backingCoinType && coins_by_type[coin_type.backingCoinType]) {
             let isDepositAllowed = allowed_outputs_by_input[coin_type.backingCoinType] && allowed_outputs_by_input[coin_type.backingCoinType][coin_type.coinType];
             let isWithdrawalAllowed = allowed_outputs_by_input[coin_type.coinType] && allowed_outputs_by_input[coin_type.coinType][coin_type.backingCoinType];
 
-            blocktradesBackedCoins.push({
+            transwiserBackedCoins.push({
                 name: coins_by_type[coin_type.backingCoinType].name,
                 walletType: coins_by_type[coin_type.backingCoinType].walletType,
                 backingCoinType: coins_by_type[coin_type.backingCoinType].walletSymbol,
@@ -102,10 +102,10 @@ export function getBackedCoins({allCoins, tradingPairs, backer}) {
                 withdrawalAllowed: isWithdrawalAllowed
             });
         }});
-    return blocktradesBackedCoins;
+    return transwiserBackedCoins;
 }
 
-export function validateAddress({url = blockTradesAPIs.BASE, walletType, newAddress}) {
+export function validateAddress({url = transwiserAPIs.BASE, walletType, newAddress}) {
     if (!newAddress) return new Promise((res) => res());
     return fetch(
         url + "/wallets/" + walletType + "/address-validator?address=" + encodeURIComponent(newAddress),
@@ -119,23 +119,23 @@ export function validateAddress({url = blockTradesAPIs.BASE, walletType, newAddr
 }
 
 function hasWithdrawalAddress(wallet) {
-    return blockTradesStorage.has(`history_address_${wallet}`);
+    return transwiserStorage.has(`history_address_${wallet}`);
 }
 
 function setWithdrawalAddresses({wallet, addresses}) {
-    blockTradesStorage.set(`history_address_${wallet}`, addresses);
+    transwiserStorage.set(`history_address_${wallet}`, addresses);
 }
 
 function getWithdrawalAddresses(wallet) {
-    return blockTradesStorage.get(`history_address_${wallet}`, []);
+    return transwiserStorage.get(`history_address_${wallet}`, []);
 }
 
 function setLastWithdrawalAddress({wallet, address}) {
-    blockTradesStorage.set(`history_address_last_${wallet}`, address);
+    transwiserStorage.set(`history_address_last_${wallet}`, address);
 }
 
 function getLastWithdrawalAddress(wallet) {
-    return blockTradesStorage.get(`history_address_last_${wallet}`, "");
+    return transwiserStorage.get(`history_address_last_${wallet}`, "");
 }
 
 export const WithdrawAddresses = {

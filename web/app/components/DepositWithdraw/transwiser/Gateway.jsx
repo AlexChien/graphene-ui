@@ -1,6 +1,6 @@
 import React from "react";
 import GatewayDepositRequest from "./GatewayDepositRequest";
-import TransConf from "./MingEXConfig";
+import TransConf from "./TransConfig";
 import Translate from "react-translate-component";
 import AccountBalance from "components/Account/AccountBalance";
 import { connect } from "alt-react";
