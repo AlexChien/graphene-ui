@@ -568,8 +568,14 @@ var Utils = {
         return Math.round((a/b) * 100) + "%";
     },
 
+    // input: 0.004
+    // output: 0.4%
+    percentagize(a){
+      return Number(a)*100 + "%"
+    },
+
     replaceName(name, isBitAsset = false) {
-        let toReplace = ["TRADE.", "OPEN.", "METAEX."];
+        let toReplace = ["TRADE.", "OPEN.", "METAEX.", "MINGEX."];
         let suffix = "";
         let i;
         for (i = 0; i < toReplace.length; i++) {

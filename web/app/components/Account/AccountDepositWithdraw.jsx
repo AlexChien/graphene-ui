@@ -5,7 +5,14 @@ import utils from "common/utils";
 import Translate from "react-translate-component";
 import ChainTypes from "../Utility/ChainTypes";
 import BindToChainState from "../Utility/BindToChainState";
-import TranswiserDepositWithdraw from "../DepositWithdraw/transwiser/TranswiserDepositWithdraw";
+
+import TranswiserDepositWithdraw from "../DepositWithdraw/transwiser.v1/TranswiserDepositWithdraw";
+
+import TranswiserFiatDepositWithdrawal from "../DepositWithdraw/transwiser/FiatDepositWithdrawal";
+import TranswiserFiatTransactionHistory from "../DepositWithdraw/transwiser/FiatTransactionHistory";
+import TranswiserGateway from "../DepositWithdraw/transwiser/Gateway";
+import TransConf from "../DepositWithdraw/transwiser3/TransConfig";
+
 import BlockTradesGateway from "../DepositWithdraw/BlockTradesGateway";
 import OpenLedgerFiatDepositWithdrawal from "../DepositWithdraw/openledger/OpenLedgerFiatDepositWithdrawal";
 import OpenLedgerFiatTransactionHistory from "../DepositWithdraw/openledger/OpenLedgerFiatTransactionHistory";
@@ -38,6 +45,7 @@ class AccountDepositWithdraw extends React.Component {
             olService: props.viewSettings.get("olService", "gateway"),
             btService: props.viewSettings.get("btService", "bridge"),
             metaService: props.viewSettings.get("metaService", "bridge"),
+            transService: props.viewSettings.get("transService", "gateway"),
             activeService: props.viewSettings.get("activeService", 0)
         };
     }
@@ -47,9 +55,11 @@ class AccountDepositWithdraw extends React.Component {
             nextProps.account !== this.props.account ||
             !utils.are_equal_shallow(nextProps.blockTradesBackedCoins, this.props.blockTradesBackedCoins) ||
             !utils.are_equal_shallow(nextProps.openLedgerBackedCoins, this.props.openLedgerBackedCoins) ||
+            !utils.are_equal_shallow(nextProps.transBackedCoins, this.props.transBackedCoins) ||
             nextState.olService !== this.state.olService ||
             nextState.btService !== this.state.btService ||
             nextState.metaService !== this.state.metaService ||
+            nextState.transService !== this.state.transService ||
             nextState.activeService !== this.state.activeService
         );
     }
@@ -85,6 +95,16 @@ class AccountDepositWithdraw extends React.Component {
 
         SettingsActions.changeViewSetting({
             metaService: service
+        });
+    }
+
+    toggleTransService(service) {
+        this.setState({
+            transService: service
+        });
+
+        SettingsActions.changeViewSetting({
+            transService: service
         });
     }
 
@@ -201,10 +221,6 @@ class AccountDepositWithdraw extends React.Component {
                         </tr>
                         </thead>
                         <tbody>
-                        {/* <TranswiserDepositWithdraw
-                            issuerAccount="transwiser-wallet"
-                            account={account.get("name")}
-                            receiveAsset="TCNY" /> */}
                         <TranswiserDepositWithdraw
                             issuerAccount="transwiser-wallet"
                             account={account.get("name")}
@@ -260,6 +276,17 @@ class AccountDepositWithdraw extends React.Component {
                 return 1;
             return 0;
         });
+
+        let transwiser3GatewayCoins = this.state.transwiser3BackedCoins.map(coin => {
+            return coin;
+        })
+        .sort((a, b) => {
+    			if (a.symbol < b.symbol)
+    				return -1
+    			if (a.symbol > b.symbol)
+    				return 1
+    			return 0
+    		});
 
         let services = this.renderServices(blockTradesGatewayCoins, openLedgerGatewayCoins);
 
@@ -323,6 +350,7 @@ class DepositStoreWrapper extends React.Component {
         if (Apis.instance().chain_id.substr(0, 8) === "4018d784") { // Only fetch this when on BTS main net
             GatewayActions.fetchCoins.defer(); // Openledger
             GatewayActions.fetchCoins.defer({backer: "TRADE"}); // Blocktrades
+            // GatewayActions.fetchCoins.defer({backer: "TRANS"}); // Transwiser
         }
     }
 
@@ -340,7 +368,8 @@ export default connect(DepositStoreWrapper, {
             account: AccountStore.getState().currentAccount,
             viewSettings: SettingsStore.getState().viewSettings,
             openLedgerBackedCoins: GatewayStore.getState().backedCoins.get("OPEN", []),
-            blockTradesBackedCoins: GatewayStore.getState().backedCoins.get("TRADE", [])
+            blockTradesBackedCoins: GatewayStore.getState().backedCoins.get("TRADE", []),
+            transBackedCoins: GatewayStore.getState().backedCoins.get("TRANS", [])
         };
     }
 });

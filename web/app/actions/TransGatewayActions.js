@@ -1,5 +1,5 @@
 import alt from "alt-instance";
-import { fetchCoins, fetchBridgeCoins, getBackedCoins, getActiveWallets } from "common/blockTradesMethods";
+import { fetchCoins, fetchBridgeCoins, getBackedCoins, getActiveWallets } from "DepositWithdraw/transwiser/methods";
 import {blockTradesAPIs} from "api/apiConfig";
 
 let inProgress = {};
